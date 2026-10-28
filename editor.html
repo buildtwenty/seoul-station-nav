@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>좌표 편집기</title>
+<link rel="stylesheet" href="src/style.css">
+<style>
+.app{grid-template-columns:340px 1fr}
+.ed{position:relative;overflow:hidden;background:var(--bg);cursor:crosshair}
+.ed canvas{width:100%;height:100%;display:block;touch-action:none}
+.side h2{font-size:14px;margin:16px 0 6px;border-top:1px solid var(--rule);padding-top:12px}
+.row{display:flex;gap:6px;margin-bottom:8px;align-items:center}
+.row input[type=number],.row input[type=text],.row select{flex:1;min-width:0;font:inherit;padding:6px 8px;border:1.5px solid var(--rule);border-radius:8px;background:var(--panel);color:var(--ink);margin:0}
+.row label{margin:0;font-weight:500;font-size:13px;white-space:nowrap}
+button.b{font:inherit;font-size:13px;font-weight:600;border:1.5px solid var(--rule);background:var(--panel);color:var(--ink);border-radius:8px;padding:6px 10px;cursor:pointer}
+button.b[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.modes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.status{font-size:12.5px;color:var(--sub);min-height:2.6em;margin:6px 0}
+.list{font-size:12.5px;max-height:220px;overflow:auto;border:1px solid var(--rule);border-radius:8px;padding:6px}
+.list div{padding:2px 4px;cursor:pointer;border-radius:4px}
+.list div.sel{background:color-mix(in srgb,var(--route) 18%,transparent)}
+textarea{width:100%;height:120px;font:12px ui-monospace,monospace;border:1.5px solid var(--rule);border-radius:8px;background:var(--panel);color:var(--ink)}
+.kbd{font-size:12px;color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <h1 style="margin-top:0">좌표 편집기</h1>
+    <p class="lede">안내도 이미지 위를 클릭해서 지점과 연결을 찍고, 역 JSON으로 내보냅니다. <a href="index.html">뷰어로</a></p>
+
+    <h2>1. 그림</h2>
+    <div class="row"><input type="file" id="img" accept="image/*"></div>
+    <div class="row"><label>투명도</label><input type="range" id="alpha" min="0.2" max="1" step="0.05" value="1"></div>
+    <div class="row"><label>보기</label>
+      <select id="proj"><option value="section">단면 (옆에서: 가로=승강장 축, 세로=높이)</option><option value="plan">평면 (위에서: 가로=x, 세로=z)</option></select></div>
+    <div class="row" id="axisRow"><label>승강장 축</label><select id="axis"><option value="z">z (남북)</option><option value="x">x (동서)</option></select>
+      <label>가로 위치</label><input type="number" id="cross" value="0" step="1" title="단면 보기에서 찍는 점의 다른 축 좌표"></div>
+
+    <h2>2. 축척 · 원점</h2>
+    <div class="modes">
+      <button class="b" data-mode="scale">축척 두 점</button>
+      <button class="b" data-mode="origin">원점</button>
+    </div>
+    <div class="row"><label>두 점 사이 실제 길이</label><input type="number" id="scaleLen" value="160" step="1"><label>m</label></div>
+    <div class="status" id="calib">축척 없음. 승강장 길이(칸 수 × 20 m)를 두 점으로 찍으면 정확합니다.</div>
+
+    <h2>3. 지점 · 연결</h2>
+    <div class="modes">
+      <button class="b" data-mode="node" aria-pressed="true">지점 찍기</button>
+      <button class="b" data-mode="edge">연결 잇기</button>
+      <button class="b" data-mode="move">옮기기</button>
+    </div>
+    <div class="row"><label>층 높이 y</label><input type="number" id="ny" value="0" step="1"><label>m</label></div>
+    <div class="row"><label>종류</label>
+      <select id="ntype"><option value="stair">승강장 계단 입구</option><option value="landing">층계참</option><option value="concourse">대합실·통로</option><option value="gate">개찰구</option><option value="exit">출구</option><option value="elevator">엘리베이터</option></select></div>
+    <div class="row"><label>연결 종류</label>
+      <select id="etype"><option value="walk">걷기</option><option value="stair">계단</option><option value="esc">에스컬레이터</option><option value="elevator">엘리베이터</option><option value="mix">계단/에스컬레이터 미확인</option><option value="gate">개찰구 통과</option><option value="plat">승강장 위</option></select>
+      <label class="chk" style="margin:0"><input type="checkbox" id="est"> 추정</label></div>
+    <div class="status" id="status"></div>
+    <div class="list" id="nodes"></div>
+    <p class="kbd">Delete: 선택 지점 삭제 · Esc: 선택 해제 · 휠: 확대 · 가운데 버튼/Space+끌기: 이동</p>
+
+    <h2>4. 내보내기 · 불러오기</h2>
+    <div class="row"><label>역 id</label><input type="text" id="sid" value="new-station"><label>이름</label><input type="text" id="sname" value="새 역"></div>
+    <div class="modes">
+      <button class="b" id="export">JSON 내려받기</button>
+      <button class="b" id="copy">JSON 복사</button>
+      <button class="b" id="load">JSON 붙여넣기 불러오기</button>
+    </div>
+    <textarea id="json" placeholder="기존 역 JSON을 붙여넣고 '불러오기'. 승강장(platforms)·층판(floors)은 그대로 보존되고 지점·연결만 편집합니다."></textarea>
+  </aside>
+  <main class="ed"><canvas id="c"></canvas></main>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const canvas=$('#c'),g=canvas.getContext('2d');
+const S={img:null,alpha:1,view:{x:0,y:0,k:1},mode:'node',proj:'section',axis:'z',cross:0,
+  scalePts:[],pxPerM:null,origin:null,nodes:{},edges:[],extra:{},sel:null,edgeFrom:null,drag:null,pan:null,space:false,seq:1};
+
+/* ---------- 좌표 변환 ---------- */
+const toImg=(sx,sy)=>({x:(sx-S.view.x)/S.view.k,y:(sy-S.view.y)/S.view.k});
+const toScr=(ix,iy)=>({x:ix*S.view.k+S.view.x,y:iy*S.view.k+S.view.y});
+function imgToWorld(ix,iy,y){ // 이미지 px → [x,y,z]
+  if(!S.pxPerM||!S.origin)return null;
+  const u=(ix-S.origin.x)/S.pxPerM, v=(iy-S.origin.y)/S.pxPerM;
+  if(S.proj==='plan')return [r(u),y,r(v)];
+  const h=-v; // 위로 갈수록 높이 +
+  return S.axis==='z'?[S.cross,r(h),r(u)]:[r(u),r(h),S.cross];
+}
+function worldToImg(p){
+  if(!S.pxPerM||!S.origin)return null;
+  if(S.proj==='plan')return {x:S.origin.x+p[0]*S.pxPerM,y:S.origin.y+p[2]*S.pxPerM};
+  const u=S.axis==='z'?p[2]:p[0];
+  return {x:S.origin.x+u*S.pxPerM,y:S.origin.y-p[1]*S.pxPerM};
+}
+const r=v=>Math.round(v*2)/2;
+
+/* ---------- 그리기 ---------- */
+function resize(){const b=canvas.parentElement.getBoundingClientRect();canvas.width=b.width*devicePixelRatio;canvas.height=b.height*devicePixelRatio;canvas.style.width=b.width+'px';canvas.style.height=b.height+'px';draw();}
+new ResizeObserver(resize).observe(canvas.parentElement);
+function draw(){
+  g.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);g.clearRect(0,0,canvas.width,canvas.height);
+  if(S.img){g.globalAlpha=S.alpha;g.drawImage(S.img,S.view.x,S.view.y,S.img.width*S.view.k,S.img.height*S.view.k);g.globalAlpha=1;}
+  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  if(S.scalePts.length){g.strokeStyle=css('--esc');g.lineWidth=2;g.beginPath();S.scalePts.forEach((p,i)=>{const s=toScr(p.x,p.y);i?g.lineTo(s.x,s.y):g.moveTo(s.x,s.y);});g.stroke();S.scalePts.forEach(p=>{const s=toScr(p.x,p.y);g.fillStyle=css('--esc');g.beginPath();g.arc(s.x,s.y,5,0,7);g.fill();});}
+  if(S.origin){const s=toScr(S.origin.x,S.origin.y);g.strokeStyle=css('--gate');g.lineWidth=2;g.beginPath();g.moveTo(s.x-10,s.y);g.lineTo(s.x+10,s.y);g.moveTo(s.x,s.y-10);g.lineTo(s.x,s.y+10);g.stroke();}
+  const C={walk:css('--sub'),plat:css('--line2'),stair:css('--stair'),esc:css('--esc'),elevator:css('--elev'),mix:css('--mix'),gate:css('--gate')};
+  for(const [a,b,t,e] of S.edges){const A=pos(a),B=pos(b);if(!A||!B)continue;g.strokeStyle=C[t]||C.walk;g.lineWidth=3;g.setLineDash(e?[6,5]:[]);g.beginPath();g.moveTo(A.x,A.y);g.lineTo(B.x,B.y);g.stroke();g.setLineDash([]);}
+  for(const id in S.nodes){const n=S.nodes[id],s=pos(id);if(!s)continue;const col=n.type==='exit'?css('--exit'):n.type==='gate'?css('--gate'):n.type==='elevator'?css('--elev'):n.type==='stair'?css('--stair'):css('--route');
+    g.fillStyle=col;g.beginPath();g.arc(s.x,s.y,id===S.sel||id===S.edgeFrom?8:6,0,7);g.fill();
+    if(id===S.sel||id===S.edgeFrom){g.strokeStyle=css('--ink');g.lineWidth=2;g.stroke();}
+    g.fillStyle=css('--ink');g.font='600 12px "IBM Plex Sans KR",sans-serif';g.fillText(`${id} ${n.label||''}${n.est?' ?':''}`,s.x+9,s.y-6);}
+  function pos(id){const n=S.nodes[id];if(!n)return null;const w=worldToImg(n.p);return w?toScr(w.x,w.y):null;}
+}
+
+/* ---------- 입력 ---------- */
+let ptrDown=null;
+canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);const p={x:e.clientX,y:e.clientY};
+  if(e.button===1||S.space){S.pan={x:p.x-S.view.x,y:p.y-S.view.y};return;}
+  const rect=canvas.getBoundingClientRect(),sx=p.x-rect.left,sy=p.y-rect.top,im=toImg(sx,sy);
+  if(S.mode==='scale'){S.scalePts.push(im);if(S.scalePts.length>2)S.scalePts=[im];if(S.scalePts.length===2)applyScale();draw();return;}
+  if(S.mode==='origin'){S.origin=im;calibText();draw();return;}
+  if(!S.pxPerM||!S.origin){status('먼저 축척과 원점을 찍으세요');return;}
+  const hit=hitNode(sx,sy);
+  if(S.mode==='node'){if(hit){S.sel=hit;list();draw();return;}addNode(im);return;}
+  if(S.mode==='edge'){if(!hit)return;if(!S.edgeFrom){S.edgeFrom=hit;status(`${hit} 에서… 두 번째 지점을 클릭`);}else if(hit!==S.edgeFrom){S.edges.push([S.edgeFrom,hit,$('#etype').value,$('#est').checked?1:0]);status(`연결 ${S.edgeFrom} – ${hit} (${$('#etype').value})`);S.edgeFrom=null;}draw();return;}
+  if(S.mode==='move'){if(hit){S.sel=hit;S.drag=hit;list();}}
+});
+canvas.addEventListener('pointermove',e=>{
+  if(S.pan){S.view.x=e.clientX-S.pan.x;S.view.y=e.clientY-S.pan.y;draw();return;}
+  if(S.drag){const rect=canvas.getBoundingClientRect(),im=toImg(e.clientX-rect.left,e.clientY-rect.top),w=imgToWorld(im.x,im.y,S.nodes[S.drag].p[1]);if(w){if(S.proj==='plan'){S.nodes[S.drag].p[0]=w[0];S.nodes[S.drag].p[2]=w[2];}else{S.nodes[S.drag].p=w;}draw();list();}}
+});
+['pointerup','pointercancel'].forEach(n=>canvas.addEventListener(n,()=>{S.pan=null;S.drag=null;}));
+canvas.addEventListener('wheel',e=>{e.preventDefault();const rect=canvas.getBoundingClientRect(),sx=e.clientX-rect.left,sy=e.clientY-rect.top,f=Math.exp(-e.deltaY*0.0015);
+  S.view.x=sx-(sx-S.view.x)*f;S.view.y=sy-(sy-S.view.y)*f;S.view.k*=f;draw();},{passive:false});
+window.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  if(e.key===' '){S.space=true;e.preventDefault();}
+  if(e.key==='Escape'){S.sel=null;S.edgeFrom=null;list();draw();}
+  if(e.key==='Delete'&&S.sel){delete S.nodes[S.sel];S.edges=S.edges.filter(x=>x[0]!==S.sel&&x[1]!==S.sel);S.sel=null;list();draw();}});
+window.addEventListener('keyup',e=>{if(e.key===' ')S.space=false;});
+function hitNode(sx,sy){for(const id in S.nodes){const w=worldToImg(S.nodes[id].p);if(!w)continue;const s=toScr(w.x,w.y);if(Math.hypot(s.x-sx,s.y-sy)<10)return id;}return null;}
+
+function addNode(im){
+  const y=+$('#ny').value,w=imgToWorld(im.x,im.y,y);if(!w)return;
+  const type=$('#ntype').value;
+  let id=prompt('지점 id (영문·숫자·_)', `${type==='exit'?'x':type[0]}${S.seq++}`);if(!id)return;
+  if(S.nodes[id]){alert('같은 id가 있습니다');return;}
+  const label=prompt('이름', type==='exit'?`${id.replace(/\D/g,'')||'?'}번 출구`:'')??'';
+  const n={p:w,label,type};if($('#est').checked)n.est=1;
+  if(type==='exit'){n.no=+(prompt('출구 번호', id.replace(/\D/g,''))||0);n.p[1]=0;}
+  S.nodes[id]=n;S.sel=id;list();draw();status(`${id} 추가 [${w.join(', ')}]`);
+}
+function applyScale(){const [a,b]=S.scalePts,px=Math.hypot(a.x-b.x,a.y-b.y),m=+$('#scaleLen').value;if(px>0&&m>0){S.pxPerM=px/m;calibText();}}
+function calibText(){$('#calib').textContent=(S.pxPerM?`축척 ${(1/S.pxPerM).toFixed(3)} m/px`:'축척 없음')+(S.origin?' · 원점 있음':' · 원점 없음');}
+function status(t){$('#status').textContent=t;}
+function list(){const el=$('#nodes');el.innerHTML='';for(const id in S.nodes){const n=S.nodes[id],d=document.createElement('div');d.textContent=`${id}  ${n.label||''}  [${n.p.join(', ')}] ${n.type}${n.est?' 추정':''}`;if(id===S.sel)d.className='sel';d.onclick=()=>{S.sel=id;list();draw();};el.appendChild(d);}}
+
+/* ---------- 모드 · 설정 ---------- */
+document.querySelectorAll('.b[data-mode]').forEach(b=>b.onclick=()=>{S.mode=b.dataset.mode;S.edgeFrom=null;document.querySelectorAll('.b[data-mode]').forEach(x=>x.setAttribute('aria-pressed',x===b));draw();});
+$('#img').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{S.img=im;const b=canvas.getBoundingClientRect();S.view.k=Math.min(b.width/im.width,b.height/im.height);S.view.x=(b.width-im.width*S.view.k)/2;S.view.y=0;draw();};im.src=URL.createObjectURL(f);};
+$('#alpha').oninput=e=>{S.alpha=+e.target.value;draw();};
+$('#proj').onchange=e=>{S.proj=e.target.value;$('#axisRow').style.display=S.proj==='section'?'':'none';draw();};
+$('#axis').onchange=e=>{S.axis=e.target.value;draw();};
+$('#cross').onchange=e=>{S.cross=+e.target.value;};
+
+/* ---------- 내보내기 · 불러오기 ---------- */
+function build(){
+  const nodes={};for(const id in S.nodes){const n=S.nodes[id];nodes[id]={p:n.p,label:n.label,type:n.type};if(n.no!=null)nodes[id].no=n.no;if(n.est)nodes[id].est=1;}
+  return {...S.extra,id:$('#sid').value,kind:'station',name:$('#sname').value,yScale:S.extra.yScale||2.4,
+    floors:S.extra.floors||[],platforms:S.extra.platforms||{},nodes,edges:S.edges,
+    facts:S.extra.facts||{ok:[],est:['편집기로 안내도 위에서 찍은 좌표. 현장 확인 전']},
+    calib:{proj:S.proj,axis:S.axis,pxPerM:S.pxPerM,origin:S.origin,image:$('#img').files[0]?.name||null}};
+}
+$('#export').onclick=()=>{const j=JSON.stringify(build(),null,1),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([j],{type:'application/json'}));a.download=`${$('#sid').value}.json`;a.click();};
+$('#copy').onclick=()=>{navigator.clipboard.writeText(JSON.stringify(build(),null,1));status('복사했습니다');};
+$('#load').onclick=()=>{try{const j=JSON.parse($('#json').value);const {nodes,edges,calib,...rest}=j;S.extra=rest;S.nodes=nodes||{};S.edges=edges||[];
+  if(calib){S.proj=calib.proj||'section';S.axis=calib.axis||'z';S.pxPerM=calib.pxPerM;S.origin=calib.origin;$('#proj').value=S.proj;$('#axis').value=S.axis;}
+  $('#sid').value=j.id||'';$('#sname').value=j.name||'';calibText();list();draw();status(`불러옴: 지점 ${Object.keys(S.nodes).length}, 연결 ${S.edges.length}`);}catch(e){alert('JSON 오류: '+e.message);}};
+resize();calibText();
+</script>
+</body>
+</html>

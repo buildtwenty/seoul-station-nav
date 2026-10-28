@@ -1,0 +1,6 @@
+# 서울교통공사 안내도 이미지는 저작권 때문에 저장소에 올리지 않는다. tools/fetch_plans.py 로 받는다.
+data/plans/**/*.jpg
+data/plans/**/*.png
+__pycache__/
+.DS_Store
+Thumbs.db

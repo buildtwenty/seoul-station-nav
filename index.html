@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>역 안 길찾기 모형</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/style.css">
+<script type="importmap">
+{ "imports": { "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.min.js" } }
+</script>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <label for="station">역</label>
+    <select id="station"></select>
+    <h1 id="title">역 안 길찾기 모형</h1>
+    <p class="lede" id="lede"></p>
+    <label for="from">내린 열차</label>
+    <select id="from"></select>
+    <label for="to">가는 곳</label>
+    <select id="to"></select>
+    <div class="opts">
+      <label class="chk"><input type="checkbox" id="access"> 계단 없이 (엘리베이터·평지만)</label>
+      <label class="chk"><input type="checkbox" id="yscale" checked> 층 높이 과장</label>
+    </div>
+    <div class="door"><b id="doorNo">–</b><span>이 문에서 내리면<br>가장 가깝습니다</span></div>
+    <div id="doorNote" class="note"></div>
+    <ol class="steps" id="steps"></ol>
+    <details>
+      <summary>이 모형에서 확인한 것과 추정한 것</summary>
+      <div id="facts"></div>
+    </details>
+    <p class="foot"><a href="editor.html">좌표 편집기</a> · <a href="https://github.com/buildtwenty/seoul-station-nav">GitHub</a></p>
+  </aside>
+  <main class="stage">
+    <canvas id="c" tabindex="0" aria-label="역 입체 모형. 끌어서 돌리고, 휠이나 두 손가락으로 확대합니다. 방향키와 +, - 키도 쓸 수 있습니다."></canvas>
+    <div class="hint">끌어서 돌리기 · 휠/두 손가락으로 확대</div>
+    <div class="views" role="group" aria-label="보는 방향">
+      <button type="button" id="whole" aria-pressed="false">역 전체</button>
+      <button type="button" data-v="iso" aria-pressed="true">입체</button>
+      <button type="button" data-v="top" aria-pressed="false">위에서</button>
+      <button type="button" data-v="side" aria-pressed="false">옆에서</button>
+    </div>
+    <div class="legend" aria-hidden="true">
+      <span><i style="background:var(--route)"></i>안내 경로</span>
+      <span><i style="background:var(--stairs)"></i>계단</span>
+      <span><i style="background:var(--escal)"></i>에스컬레이터</span>
+      <span><i style="background:var(--elev)"></i>엘리베이터</span>
+      <span><i style="background:var(--gate)"></i>개찰구</span>
+      <span><i style="background:var(--exit)"></i>출구</span>
+    </div>
+  </main>
+</div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

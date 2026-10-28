@@ -1,0 +1,65 @@
+{
+  "id": "myeonmok",
+  "name": "면목",
+  "line": 7,
+  "lineLabel": "7호선",
+  "codes": { "7호선": "2723" },
+  "layout": "island",
+  "cars": 8,
+  "carLength": 20,
+  "platformWidth": 10,
+  "axis": "z",
+  "platformLabel": "지하 4층",
+  "lede": "7호선 섬식 승강장(지하 4층). 공식 안내도의 단면을 보고 파라미터로 자동 생성한 모형입니다.",
+  "source": {
+    "urls": ["https://www.seoulmetro.co.kr/common/resources/cyber/fileView.jsp?fileName=in_2723.jpg"],
+    "plans": ["data/plans/myeonmok/in_2723.jpg"],
+    "checked": "2026-10-28",
+    "note": "안내도 단면(B1 대합실 · B2 대합실 · B3 대합실 · B4 승강장)에서 계단·엘리베이터·출구의 승강장 방향 위치를 비율로 읽음. 층 높이는 6 m 가정"
+  },
+  "ends": { "a": { "name": "상봉", "dir": -1 }, "b": { "name": "사가정", "dir": 1 } },
+  "levels": { "platform": -24, "lower": -18, "upper": -6 },
+  "platforms": [
+    { "key": "p7u", "label": "장암 방면", "car1": "a", "trackSide": 1, "toward": ["장암"], "nextStation": "상봉" },
+    { "key": "p7d", "label": "석남 방면", "car1": "b", "trackSide": -1, "toward": ["온수(성공회대입구)", "석남", "온수"], "nextStation": "사가정" }
+  ],
+  "platformAccess": [
+    { "id": "s1", "at": 0.35, "type": "stair" },
+    { "id": "ev", "at": 0.43, "type": "elevator" },
+    { "id": "s2", "at": 0.52, "type": "stair" }
+  ],
+  "lowerExtent": [0.1, 0.65],
+  "lowerLabel": "7호선 대합실 · 지하 3층",
+  "lowerToUpper": [
+    { "id": "st", "at": 0.24, "type": "stair" },
+    { "id": "es", "at": 0.3, "type": "esc" },
+    { "id": "ev", "at": 0.43, "type": "elevator" }
+  ],
+  "upperExtent": [0.0, 0.72],
+  "upperLabel": "7호선 대합실 · 지하 1층",
+  "gates": [
+    { "at": 0.17, "label": "개찰구 (상봉 쪽)" },
+    { "at": 0.46, "label": "개찰구 (사가정 쪽)" }
+  ],
+  "groundElevators": [
+    { "at": 0.55, "side": 1, "near": 2 }
+  ],
+  "exits": [
+    { "no": 1, "at": 0.08, "side": -1, "type": "stair" },
+    { "no": 3, "at": 0.5, "side": -1, "type": "esc" },
+    { "no": 2, "at": 0.62, "side": 1, "type": "stair" }
+  ],
+  "facts": {
+    "ok": [
+      "공식 안내도(서울교통공사): 섬식 승강장 지하 4층, 대합실 지하 1·2·3층, 출구 1·2·3번",
+      "승강장에서 계단 2곳과 엘리베이터 1대로 지하 3층 대합실로 올라감. 지하 3층에서 지하 1층까지 긴 계단·에스컬레이터·엘리베이터",
+      "1번 출구는 상봉 쪽 끝, 3번은 에스컬레이터, 2번은 사가정 쪽"
+    ],
+    "est": [
+      "계단·엘리베이터·개찰구·출구의 승강장 방향 위치(단면도 비율로 어림, 한두 칸 어긋날 수 있음)",
+      "출구가 승강장 축의 어느 쪽(동/서)으로 나가는지",
+      "층 사이 높이(6 m 가정)",
+      "빠른 하차 문 번호(모형 계산값, 공식 출구별 자료 미확보)"
+    ]
+  }
+}
