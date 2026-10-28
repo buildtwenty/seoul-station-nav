@@ -104,9 +104,10 @@ function resize() {
 new ResizeObserver(resize).observe(canvas);
 
 const compass = $('#compass');
+window.__nav = { orbit, camera, S, step: (n = 1) => { for (let i = 0; i < n; i++) { orbit.update(); updateCompass(); } renderer.render(scene, camera); } };
 function updateCompass() {
   const a = orbit.o.t.clone().project(camera), b = orbit.o.t.clone().add(new THREE.Vector3(0, 0, -50)).project(camera);
-  const ang = Math.atan2(b.x - a.x, b.y - a.y) * 180 / Math.PI;
+  const ang = Math.atan2((b.x - a.x) * camera.aspect, b.y - a.y) * 180 / Math.PI;
   compass.style.transform = `rotate(${ang}deg)`;
 }
 function frame(now) { orbit.update(); sun.target.position.copy(orbit.o.t); sun.position.copy(orbit.o.t).add(new THREE.Vector3(-220, 420, 260)); S.animate(now / 1000, reduced); updateCompass(); renderer.render(scene, camera); requestAnimationFrame(frame); }
