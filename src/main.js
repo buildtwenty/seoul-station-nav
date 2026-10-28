@@ -12,10 +12,13 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const canvas = $('#c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(32, 1, 1, 6000);
 scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 0.95));
-const sun = new THREE.DirectionalLight(0xffffff, 0.55); sun.position.set(-200, 400, 250); scene.add(sun);
+const sun = new THREE.DirectionalLight(0xffffff, 0.7); sun.position.set(-220, 420, 260); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -400, right: 400, top: 400, bottom: -400, near: 10, far: 1500 }); sun.shadow.bias = -0.0008;
+scene.add(sun, sun.target);
 const S = new StationScene(scene);
 const orbit = createOrbit(camera, canvas);
 
@@ -32,6 +35,7 @@ async function init() {
   const want = location.hash.slice(1);
   if (index.some((v) => v.id === want)) sel.value = want;
   sel.onchange = () => loadStation(sel.value);
+  window.addEventListener('hashchange', () => { const id = location.hash.slice(1); if (id && id !== cur.id && index.some((v) => v.id === id)) { sel.value = id; loadStation(id); } });
   $('#from').onchange = (e) => { cur.from = e.target.value; fillTo(); refresh(true); };
   $('#to').onchange = (e) => { cur.to = e.target.value; refresh(false); };
   $('#access').onchange = (e) => { cur.access = e.target.checked; refresh(false); };
@@ -99,7 +103,13 @@ function resize() {
 }
 new ResizeObserver(resize).observe(canvas);
 
-function frame(now) { orbit.update(); S.animate(now / 1000, reduced); renderer.render(scene, camera); requestAnimationFrame(frame); }
+const compass = $('#compass');
+function updateCompass() {
+  const a = orbit.o.t.clone().project(camera), b = orbit.o.t.clone().add(new THREE.Vector3(0, 0, -50)).project(camera);
+  const ang = Math.atan2(b.x - a.x, b.y - a.y) * 180 / Math.PI;
+  compass.style.transform = `rotate(${ang}deg)`;
+}
+function frame(now) { orbit.update(); sun.target.position.copy(orbit.o.t); sun.position.copy(orbit.o.t).add(new THREE.Vector3(-220, 420, 260)); S.animate(now / 1000, reduced); updateCompass(); renderer.render(scene, camera); requestAnimationFrame(frame); }
 
 const themeWatch = () => { if (st) refresh(true); };
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', themeWatch);

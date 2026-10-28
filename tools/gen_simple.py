@@ -116,6 +116,7 @@ def main(path):
     if yL is not None: floors.append(floorBox(yL, *P.get('lowerExtent', [0.1, 0.7]), P.get('lowerLabel', '대합실 (아래)')))
     floors.append(floorBox(yU, *P.get('upperExtent', [0.0, 0.75]), P.get('upperLabel', '대합실')))
     road = {'x0': -14, 'x1': 14, 'z0': -half - 50, 'z1': half + 50} if axis == 'z' else {'x0': -half - 50, 'x1': half + 50, 'z0': -14, 'z1': 14}
+    if P.get('roadName'): road['name'] = P['roadName']
     endTags = [[f"{ends['a']['name']} 방면", pt(-0.15, yP), [0, 0, -1] if axis == 'z' else [-1, 0, 0]],
                [f"{ends['b']['name']} 방면", pt(1.15, yP), [0, 0, 1] if axis == 'z' else [1, 0, 0]]]
 

@@ -9,6 +9,7 @@
   "carLength": 20,
   "platformWidth": 10,
   "axis": "z",
+  "roadName": "면목로",
   "platformLabel": "지하 4층",
   "lede": "7호선 섬식 승강장(지하 4층). 공식 안내도의 단면을 보고 파라미터로 자동 생성한 모형입니다.",
   "source": {

@@ -4,21 +4,21 @@
   --exit:#FFCD12; --exit-ink:#1B1B1B;
   --route:#E5007F; --esc:#2F7DE1; --stair:#5B6B7C; --mix:#9A86D8; --elev:#1F9E89;
   --slab:#DCE2E7; --slab-edge:#AEB9C3; --plat1:#C9D8EA; --plat2:#CBE8D5; --plat3:#F5D9C2; --plat4:#C6E6F2; --plat5:#DED3E6; --plat6:#EBD6C4; --plat7:#DDE2B4; --plat8:#F3CCDB; --plat9:#E5E0D2;
-  --stairs:#B3BEC8; --escal:#56626F; --gate:#C0392B; --track:#2E3740; --ground:#AFBBC5;
+  --stairs:#B3BEC8; --escal:#56626F; --escal-step:#8D99A6; --gate:#C0392B; --track:#2E3740; --rail:#9AA6B2; --ground:#C9D2D9; --road:#F2F4F6; --road-line:#D9DEE3; --road-ink:#6B7784; --safety:#F2C94C; --glass:#9CC4E4; --walk:#E6EAEE;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#141A21; --panel:#1E2630; --ink:#E8EDF2; --sub:#9BA9B7; --rule:#313C49;
     --line2:#2CC873; --line7:#A8B533; --route:#FF4DA6; --esc:#5A9CF0; --stair:#8C9BAB; --mix:#B3A2EA; --elev:#3CC9B0;
     --slab:#46525F; --slab-edge:#35404B; --plat1:#2F4B6B; --plat2:#2F6B4A; --plat3:#6B4A2F; --plat4:#2F5F6B; --plat5:#4F3F6B; --plat6:#6B4F3A; --plat7:#5C6326; --plat8:#6B2F4A; --plat9:#5F5A4A;
-    --stairs:#7B8896; --escal:#A9B6C3; --gate:#E0604F; --track:#0B0F13; --ground:#2C3743;
+    --stairs:#7B8896; --escal:#A9B6C3; --escal-step:#6B7785; --gate:#E0604F; --track:#0B0F13; --rail:#6B7785; --ground:#1C242C; --road:#283340; --road-line:#3B4756; --road-ink:#9BA9B7; --safety:#E0B93F; --glass:#5A8DB5; --walk:#3A4654;
   }
 }
 :root[data-theme="dark"]{
   --bg:#141A21; --panel:#1E2630; --ink:#E8EDF2; --sub:#9BA9B7; --rule:#313C49;
   --line2:#2CC873; --line7:#A8B533; --route:#FF4DA6; --esc:#5A9CF0; --stair:#8C9BAB; --mix:#B3A2EA; --elev:#3CC9B0;
   --slab:#46525F; --slab-edge:#35404B; --plat1:#2F4B6B; --plat2:#2F6B4A; --plat3:#6B4A2F; --plat4:#2F5F6B; --plat5:#4F3F6B; --plat6:#6B4F3A; --plat7:#5C6326; --plat8:#6B2F4A; --plat9:#5F5A4A;
-  --stairs:#7B8896; --escal:#A9B6C3; --gate:#E0604F; --track:#0B0F13; --ground:#2C3743;
+  --stairs:#7B8896; --escal:#A9B6C3; --escal-step:#6B7785; --gate:#E0604F; --track:#0B0F13; --rail:#6B7785; --ground:#1C242C; --road:#283340; --road-line:#3B4756; --road-ink:#9BA9B7; --safety:#E0B93F; --glass:#5A8DB5; --walk:#3A4654;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -73,3 +73,7 @@ details a{color:var(--esc);word-break:break-all}
   .stage{order:1;height:54vh}.side{order:2;border-right:0;border-top:1px solid var(--rule);overflow:visible}
   .hint{display:none}
 }
+
+.compass{position:absolute;right:14px;bottom:14px;width:56px;height:56px;border-radius:50%;background:color-mix(in srgb,var(--panel) 88%,transparent);
+  border:1.5px solid var(--rule);display:grid;place-items:center;pointer-events:none}
+.compass svg{width:44px;height:44px;transition:transform .08s linear}
