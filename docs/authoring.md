@@ -21,7 +21,7 @@ python tools/fetch_plans.py 건대입구 면목
 
 ## 2-C. 단일 노선 역: 파라미터로 만들기
 
-`data/params/myeonmok.json`을 복사해서 고친다.
+`docs/example-params-myeonmok.json`을 `data/params/<id>.json`으로 복사해서 고친다.
 
 - `levels`: 층 높이. 승강장 `platform`, 그 위 대합실 `lower`(없으면 생략), 개찰구가 있는 대합실 `upper`. 모르면 층당 6 m
 - `platformAccess`: 승강장에서 올라가는 계단·에스컬레이터·엘리베이터. `at`은 승강장 a끝(0)→b끝(1) 비율
@@ -32,8 +32,8 @@ python tools/fetch_plans.py 건대입구 면목
 - `platforms[].toward`: 공식 빠른환승 자료의 "종착역명"과 맞추기 위한 이름 목록
 
 ```bash
-python tools/gen_simple.py data/params/myeonmok.json
-python tools/validate.py data/venues/myeonmok.json
+python tools/gen_simple.py data/params/<id>.json
+python tools/validate.py data/venues/<id>.json
 ```
 
 ## 2-A. 환승역: 편집기로 좌표 찍기

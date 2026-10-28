@@ -22,8 +22,8 @@
 
 | 등급 | 뜻 | 지금 |
 |---|---|---|
-| A | 환승역. 안내도와 공식 환승값으로 좌표를 잡은 모형 | 건대입구 (공식 환승값 8개 모두 일치, `tools/build_konkuk.py`) |
-| C | 단일 노선 역. 단면도에서 읽은 파라미터로 자동 생성 | 면목 |
+| A | 안내도·나무위키·지도를 읽어 손으로 좌표를 잡은 모형 | 건대입구 (공식 환승값 8개 모두 일치, `tools/build_konkuk.py`), 면목 (`tools/build_myeonmok.py`) |
+| C | 단일 노선 역. 단면도에서 읽은 파라미터로 자동 생성 | (예시 파라미터: docs/example-params-myeonmok.json) |
 
 역을 추가하는 순서는 [docs/authoring.md](docs/authoring.md).
 

@@ -1,4 +1,4 @@
 [
   { "id": "konkuk-univ", "name": "건대입구", "file": "data/venues/konkuk-univ.json", "grade": "A", "lines": [2, 7] },
-  { "id": "myeonmok", "name": "면목", "file": "data/venues/myeonmok.json", "grade": "C", "lines": [7] }
+  { "id": "myeonmok", "name": "면목", "file": "data/venues/myeonmok.json", "grade": "A", "lines": [7] }
 ]

@@ -23,7 +23,11 @@ jobs:
         with:
           python-version: '3.12'
       - name: Regenerate parametric stations
-        run: python tools/gen_simple.py data/params/*.json
+        run: |
+          shopt -s nullglob
+          for f in data/params/*.json; do python tools/gen_simple.py "$f"; done
+          python tools/build_konkuk.py
+          python tools/build_myeonmok.py
       - name: Validate station data
         run: python tools/validate.py
 
