@@ -25,43 +25,44 @@ def e(a, b, t, est=0): E.append([a, b, t, est])
 B1, B3, B4 = -6, -18, -24
 
 # ---------- B4 승강장 (상대식) ----------
+# 안내도 입체도 원본 확대: 승강장에서 올라가는 건 계단만(상봉 쪽 1, 사가정 쪽 1~2)과 엘리베이터. 에스컬레이터 표시 없음
 for side, x, nm in (('u', 7, '장암 방면'), ('d', -7, '석남 방면')):
-    n(f'esA_{side}', [x, B4, -28], '상봉 쪽 에스컬레이터', 'stair', est=1)
-    n(f'stA_{side}', [x, B4, -24], '상봉 쪽 계단', 'stair', est=1)
+    n(f'stA_{side}', [x, B4, -28], '상봉 쪽 계단', 'stair', est=1)
     n(f'ev4_{side}', [x, B4, -10], '엘리베이터 (승강장)', 'elevator', est=1)
-    n(f'stB_{side}', [x, B4, 6], '사가정 쪽 계단', 'stair', est=1)
+    n(f'stB_{side}', [x, B4, 16], '사가정 쪽 계단', 'stair', est=1)
     # B3 층계참 (승강장 바로 위)
     n(f'lA_{side}', [x * 0.6, B3, -18], '지하 3층 대합실', 'landing', est=1)
     n(f'ev3_{side}', [x * 0.6, B3, -10], '엘리베이터 (지하 3층)', 'elevator', est=1)
-    n(f'lB_{side}', [x * 0.6, B3, -4], '지하 3층 대합실', 'landing', est=1)
-    e(f'esA_{side}', f'lA_{side}', 'esc'); e(f'stA_{side}', f'lA_{side}', 'stair', 1)
+    n(f'lB_{side}', [x * 0.6, B3, 6], '지하 3층 대합실', 'landing', est=1)
+    e(f'stA_{side}', f'lA_{side}', 'stair')
     e(f'ev4_{side}', f'ev3_{side}', 'elevator', 1)
     e(f'stB_{side}', f'lB_{side}', 'stair')
-    e(f'esA_{side}', f'stA_{side}', 'plat'); e(f'stA_{side}', f'ev4_{side}', 'plat'); e(f'ev4_{side}', f'stB_{side}', 'plat')
+    e(f'stA_{side}', f'ev4_{side}', 'plat'); e(f'ev4_{side}', f'stB_{side}', 'plat')
     e(f'lA_{side}', f'ev3_{side}', 'walk', 1); e(f'ev3_{side}', f'lB_{side}', 'walk', 1)
 e('lA_u', 'lA_d', 'walk'); e('lB_u', 'lB_d', 'walk'); e('ev3_u', 'ev3_d', 'walk', 1)
 
 # ---------- B3 → B1 (상봉 쪽 긴 에스컬레이터 + 계단, 엘리베이터) ----------
 n('esL3', [0, B3, -51], '지하 3층 대합실 · 긴 에스컬레이터 앞', 'landing')
-n('esL1', [0, B1, -31], '지하 1층 대합실', 'landing')
+n('esL1', [4, B1, -31], '지하 1층 대합실 (개찰구 안)', 'landing')
 n('stL3', [3, B3, -49], '지하 3층 대합실 · 긴 계단 앞', 'landing', est=1)
-n('ev1', [0, B1, -10], '엘리베이터 (지하 1층)', 'elevator', est=1)
+n('ev1', [4, B1, -10], '엘리베이터 (지하 1층)', 'elevator', est=1)
 e('lA_u', 'esL3', 'walk'); e('lA_d', 'esL3', 'walk'); e('esL3', 'stL3', 'walk', 1)
 e('esL3', 'esL1', 'esc'); e('stL3', 'esL1', 'stair', 1)
 e('ev3_u', 'ev1', 'elevator', 1); e('ev3_d', 'ev1', 'elevator', 1)
 
-# ---------- B1 대합실: 개찰구 2곳, 출구 3개, 지상 엘리베이터 ----------
-n('g1', [0, B1, -44], '개찰구 (상봉 쪽)', 'gate', est=1); n('h1', [0, B1, -52], '1번 출구 앞', 'concourse', est=1)
-n('x1', [-16, 0, -72], '1번 출구', 'exit', 1)
-n('g2', [0, B1, -5], '개찰구 (사가정 쪽)', 'gate', est=1); n('h2', [0, B1, 0], '2·3번 출구 앞', 'concourse', est=1)
-n('x3', [-16, 0, -12], '3번 출구', 'exit', 3)
-n('h2b', [0, B1, 18], '2번 출구 앞', 'concourse', est=1)
-n('x2', [16, 0, 30], '2번 출구', 'exit', 2)
+# ---------- B1 대합실: 개찰구 1줄(대합실 축과 나란히, 유료 구역은 동쪽 주머니), 출구 3개, 지상 엘리베이터 ----------
+# 안내도 입체도 원본 확대: 개찰구(작은 상자 줄)는 엘리베이터 옆 한 줄뿐. 지하 3층에서 올라온 곳과 엘리베이터가 유료 쪽, 출구 1·2·3은 모두 무료 쪽
+n('g', [0, B1, -16], '개찰구', 'gate', est=1)
+n('h', [-4, B1, -16], '대합실 (개찰구 밖)', 'concourse', est=1)
+n('h1', [-4, B1, -52], '1번 출구 앞', 'concourse', est=1); n('x1', [-16, 0, -72], '1번 출구', 'exit', 1)
+n('h3', [-4, B1, -2], '3번 출구 앞', 'concourse', est=1); n('x3', [-16, 0, -12], '3번 출구', 'exit', 3)
+n('h2', [0, B1, 18], '2번 출구 앞', 'concourse', est=1); n('x2', [16, 0, 30], '2번 출구', 'exit', 2)
 n('evG1', [4, B1, 7], '엘리베이터 (지하 1층, 2번 출구 쪽)', 'elevator', est=1)
 n('evG', [12, 0, 7], '엘리베이터 (지상, 2번 출구 옆)', 'elevator', est=1)
-e('esL1', 'g1', 'walk'); e('g1', 'h1', 'gate'); e('h1', 'x1', 'stair')
-e('esL1', 'ev1', 'walk', 1); e('ev1', 'g2', 'walk'); e('g2', 'h2', 'gate'); e('h2', 'x3', 'esc')
-e('h2', 'h2b', 'walk'); e('h2b', 'x2', 'esc'); e('h2', 'evG1', 'walk', 1); e('evG1', 'evG', 'elevator', 1); e('evG', 'x2', 'walk', 1)
+e('esL1', 'ev1', 'walk', 1); e('esL1', 'g', 'walk', 1); e('ev1', 'g', 'walk', 1); e('g', 'h', 'gate', 1)
+e('h', 'h1', 'walk', 1); e('h1', 'x1', 'stair')
+e('h', 'h3', 'walk', 1); e('h3', 'x3', 'esc')
+e('h3', 'h2', 'walk', 1); e('h2', 'x2', 'esc'); e('h3', 'evG1', 'walk', 1); e('evG1', 'evG', 'elevator', 1); e('evG', 'x2', 'walk', 1)
 
 st = {
  "id": "myeonmok", "kind": "station", "name": "면목", "officialName": "면목",
@@ -84,18 +85,19 @@ st = {
  "pillars": [],
  "platforms": {
    "p7u": {"line": 7, "label": "장암 방면", "short": "7호선 장암 방면", "a": [7, B4, -80], "b": [7, B4, 80], "car1": "a", "cars": 8, "track": [-4.5, 0, 0], "ends": ["상봉", "사가정"],
-           "access": ["esA_u", "stA_u", "ev4_u", "stB_u"], "official": {"line": "7호선", "toward": ["장암"]}, "nextStation": "상봉"},
+           "access": ["stA_u", "ev4_u", "stB_u"], "official": {"line": "7호선", "toward": ["장암"]}, "nextStation": "상봉"},
    "p7d": {"line": 7, "label": "석남 방면", "short": "7호선 석남 방면", "a": [-7, B4, -80], "b": [-7, B4, 80], "car1": "b", "cars": 8, "track": [4.5, 0, 0], "ends": ["상봉", "사가정"],
-           "access": ["esA_d", "stA_d", "ev4_d", "stB_d"], "official": {"line": "7호선", "toward": ["온수(성공회대입구)", "석남", "온수"]}, "nextStation": "사가정"}
+           "access": ["stA_d", "ev4_d", "stB_d"], "official": {"line": "7호선", "toward": ["온수(성공회대입구)", "석남", "온수"]}, "nextStation": "사가정"}
  },
  "nodes": N, "edges": E,
  "facts": {
    "ok": ["공식 안내도: 지하 1층 대합실(개찰구·출구), 지하 2층 통과, 지하 3층 대합실, 지하 4층 승강장",
-          "승강장→지하 3층: 상봉 쪽 에스컬레이터와 계단, 가운데 엘리베이터, 사가정 쪽 계단. 지하 3층→지하 1층: 상봉 쪽 긴 에스컬레이터·계단과 엘리베이터",
+          "승강장→지하 3층: 계단(상봉 쪽·사가정 쪽)과 엘리베이터뿐, 에스컬레이터 없음. 지하 3층→지하 1층: 상봉 쪽 긴 에스컬레이터·계단과 엘리베이터",
+          "개찰구는 지하 1층에 한 줄(엘리베이터 옆). 지하 3층에서 올라온 곳이 안쪽, 출구 1·2·3은 모두 바깥쪽",
           "출구: 1번은 지하 1층 상봉 쪽 끝에서 계단, 3번은 가운데에서 에스컬레이터, 2번은 사가정 쪽에서 에스컬레이터. 2번 출구 쪽에 지상 엘리베이터",
           "나무위키: 2면 2선 곡선 상대식 승강장. 카카오맵: 1·3번 출구는 면목로 서쪽, 2번은 동쪽. 1번이 북쪽(상봉 쪽), 2번이 남쪽(사가정 쪽)"],
    "est": ["설비의 승강장 방향 위치는 안내도 단면 비율로 읽은 값(한두 칸 오차). 공식 출구별 빠른하차 자료로 검증 전",
-           "개찰구 위치(고객안전실 옆 상봉 쪽 1곳, 2·3번 출구 쪽 1곳으로 둠)",
+           "개찰구 줄의 정확한 위치와 방향, 유료 구역의 범위",
            "상대식 승강장 양쪽에 설비가 똑같이 있다고 둠(안내도 단면은 양쪽을 겹쳐 그림)",
            "출구가 지상 어디까지 이어지는지(출구 구조물 위치는 지도 기준 대략)"]
  }
